@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Share Media | ShadowChat VVIP</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ShadowChat VVIP Premium - Media & File Share UI
+       Copyright © 2026 Sumit. All Rights Reserved. */
+    
+    :root {
+      --bg-color: #000000;
+      --header-bg: rgba(10, 10, 10, 0.85);
+      --card-bg: #1c1c1e;
+      --accent-green: linear-gradient(135deg, #00b09b, #96c93d);
+      --text-main: #ffffff;
+      --text-dim: #a1a1aa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body { 
+      background: var(--bg-color); 
+      color: var(--text-main); 
+      height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+      background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);
+      background-size: 24px 24px;
+    }
+
+    /* --- VVIP Header --- */
+    .header {
+      height: 70px; background: var(--header-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      display: flex; align-items: center; padding: 0 18px; gap: 15px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05); z-index: 1000;
+    }
+    .back-btn {
+      width: 40px; height: 40px; border-radius: 12px; border: none;
+      background: rgba(255,255,255,0.03); color: white; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.08); color: #00ff88; }
+    .header h2 { font-size: 18px; font-weight: 600; letter-spacing: 0.5px; }
+
+    /* --- Upload Area --- */
+    .main-container {
+      flex: 1; padding: 25px 20px; display: flex; flex-direction: column; gap: 20px;
+      overflow-y: auto;
+    }
+    
+    .drop-zone {
+      background: rgba(28, 28, 30, 0.5);
+      border: 2px dashed rgba(255,255,255,0.15);
+      border-radius: 24px; /* Squircle */
+      padding: 50px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .drop-zone:hover {
+      border-color: #00ff88;
+      background: rgba(0, 255, 136, 0.05);
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+    }
+    .drop-zone-icon {
+      font-size: 45px; margin-bottom: 15px; display: inline-block;
+      transition: transform 0.3s;
+    }
+    .drop-zone:hover .drop-zone-icon { transform: scale(1.1) translateY(-5px); }
+    .drop-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .drop-zone p { font-size: 13px; color: var(--text-dim); }
+    #fileInput { display: none; }
+
+    /* --- Preview Box --- */
+    .preview-section {
+      display: none; flex-direction: column; align-items: center; gap: 15px;
+      background: var(--card-bg); padding: 15px; border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .media-preview {
+      max-width: 100%; max-height: 250px; border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3); object-fit: contain;
+    }
+    .file-meta { text-align: center; }
+    .file-name { font-size: 15px; font-weight: 500; margin-bottom: 4px; word-break: break-all; }
+    .file-size { font-size: 13px; color: #00ff88; font-weight: 600; }
+
+    /* --- VVIP Progress Bar --- */
+    .progress-container {
+      display: none; flex-direction: column; gap: 10px; width: 100%;
+      margin-top: 10px;
+    }
+    .progress-header { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-dim); font-weight: 500; }
+    .progress-track {
+      width: 100%; height: 8px; background: rgba(255,255,255,0.05);
+      border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.02);
+    }
+    .progress-fill {
+      height: 100%; width: 0%; background: var(--accent-green);
+      border-radius: 10px; transition: width 0.3s ease;
+      box-shadow: 0 0 10px rgba(0,255,136,0.5);
+    }
+
+    /* --- Premium Send Button --- */
+    .btn-send {
+      background: var(--accent-green);
+      color: black; border: none; padding: 16px;
+      border-radius: 18px; font-size: 16px; font-weight: 700; cursor: pointer;
+      width: 100%; display: none; transition: all 0.3s;
+      box-shadow: 0 8px 20px rgba(0, 176, 155, 0.3);
+      margin-top: auto;
+    }
+    .btn-send:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0, 176, 155, 0.5); }
+    .btn-send:active { transform: scale(0.98); }
+
+    /* --- Standard Copyright Footer --- */
+    .footer {
+      text-align: center; padding: 12px; font-size: 11px; color: #71717a; 
+      background: var(--bg-color); border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <button class="back-btn" onclick="location.href='index.html'">←</button>
+    <h2>Share Media & Files</h2>
+  </header>
+
+  <div class="main-container">
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-zone-icon">📁</div>
+      <h3 id="dropText">Tap to Select File</h3>
+      <p>Securely upload up to 1GB</p>
+      <p style="font-size: 10px; margin-top: 5px; opacity: 0.5;">Images • Videos • Documents</p>
+      <input type="file" id="fileInput" accept="image/*,video/*,.pdf,.zip,.rar,.doc,.docx">
+    </div>
+
+    <div class="preview-section" id="previewBox">
+      <img id="imgPreview" class="media-preview" style="display: none;">
+      <video id="vidPreview" class="media-preview" controls style="display: none;"></video>
+      <div class="file-icon" id="docPreview" style="font-size: 50px; display: none;">📄</div>
+      
+      <div class="file-meta">
+        <div class="file-name" id="fileName">document.pdf</div>
+        <div class="file-size" id="fileSize">12.5 MB</div>
+      </div>
+    </div>
+
+    <div class="progress-container" id="progressBox">
+      <div class="progress-header">
+        <span id="uploadStatus">Preparing chunks...</span>
+        <span id="uploadPercent">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </div>
+
+    <button class="btn-send" id="sendBtn" onclick="startUpload()">🚀 Send via Secure Link</button>
+  </div>
+
+  <footer class="footer">
+    &copy; 2026 <strong>ShadowChat</strong>. Created by <strong>Sumit</strong>. All Rights Reserved.
+  </footer>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const previewBox = document.getElementById('previewBox');
+    const imgPreview = document.getElementById('imgPreview');
+    const vidPreview = document.getElementById('vidPreview');
+    const docPreview = document.getElementById('docPreview');
+    const fileNameEl = document.getElementById('fileName');
+    const fileSizeEl = document.getElementById('fileSize');
+    
+    const sendBtn = document.getElementById('sendBtn');
+    const progressBox = document.getElementById('progressBox');
+    const progressFill = document.getElementById('progressFill');
+    const uploadPercent = document.getElementById('uploadPercent');
+    const uploadStatus = document.getElementById('uploadStatus');
+
+    // Handle File Selection
+    fileInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Hide drop zone, show preview card and send button
+      dropZone.style.display = 'none';
+      previewBox.style.display = 'flex';
+      sendBtn.style.display = 'block';
+
+      // Set File Meta Data
+      fileNameEl.innerText = file.name;
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      
+      // If file is large, show special text
+      if(sizeMB > 100) {
+        fileSizeEl.innerText = `${sizeMB} MB (Large File Mode)`;
+        fileSizeEl.style.color = "#ff4b2b"; // Alert color for very large files
+      } else {
+        fileSizeEl.innerText = `${sizeMB} MB`;
+        fileSizeEl.style.color = "#00ff88";
+      }
+
+      // Handle Previews based on type
+      const fileURL = URL.createObjectURL(file);
+      
+      imgPreview.style.display = 'none';
+      vidPreview.style.display = 'none';
+      docPreview.style.display = 'none';
+
+      if (file.type.startsWith('image/')) {
+        imgPreview.src = fileURL;
+        imgPreview.style.display = 'block';
+      } else if (file.type.startsWith('video/')) {
+        vidPreview.src = fileURL;
+        vidPreview.style.display = 'block';
+      } else {
+        docPreview.style.display = 'block';
+      }
+    });
+
+    // Simulate Secure Chunk Upload Process
+    function startUpload() {
+      sendBtn.style.display = 'none';
+      progressBox.style.display = 'flex';
+      
+      let progress = 0;
+      uploadStatus.innerText = "Encrypting & Uploading Chunks...";
+
+      const uploadInterval = setInterval(() => {
+        // Random jump between 3 to 12 percent to simulate realistic chunk uploading
+        progress += Math.floor(Math.random() * 10) + 3; 
+        if (progress > 100) progress = 100;
+        
+        progressFill.style.width = progress + '%';
+        uploadPercent.innerText = progress + '%';
+
+        if (progress === 100) {
+          clearInterval(uploadInterval);
+          uploadStatus.innerText = "Upload Complete! Secure Link Generated.";
+          uploadStatus.style.color = "#00ff88";
+          progressFill.style.boxShadow = "0 0 20px #00ff88";
+          
+          setTimeout(() => {
+            // Redirect back to chat page after success
+            location.href = 'index.html';
+          }, 1500);
+        }
+      }, 400); // Speed of simulation
+    }
+  </script>
+</body>
+</html>
